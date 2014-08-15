@@ -1,19 +1,26 @@
 #!/bin/bash
 
-# Shorthand for writing to file
-function write {
-    echo "$1" >> "$TARGET"
-}
+source  lib/instance.sh
 
-# Build config
-SCRIPTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPTDIR="$(script_dir)"
 VERSIONNO="0.1"
 LIBNAME="quickscript"
 TEMPFILE="$SCRIPTDIR/.$LIBNAME.tmp"
 BUILTFILE="$SCRIPTDIR/$LIBNAME-$VERSIONNO.sh"
 TARGET="$TEMPFILE"
 LASTLINE=""
+MINIMIZED=0
 GLOBALS=()
+
+echo "$SCRIPTDIR"
+exit
+
+# Shorthand for writing to file
+function write {
+    echo "$1" >> "$TARGET"
+}
+
+# Build config
 
 if [ -e "$BUILTFILE" ]; then
     rm "$BUILTFILE"
@@ -33,10 +40,12 @@ while IFS= read -r file; do
     while IFS= read -r line; do
         lineno=$(($lineno+1))
 
+        # Skip shell script definition
         if [ "$line" = "#!/bin/bash" ] || [ "$line" = "#!/bin/sh" ]; then
             continue
         fi
 
+        # Gather all the globals so that we can put them at the top of the built file
         if [ "$line" = "###GLOBALS_END###" ]; then
             globalsection=1
             continue
@@ -50,9 +59,11 @@ while IFS= read -r file; do
         if [ $globalsection -eq 0 ]; then
             GLOBALS+=("$line")
         else
+            # Skip multiple blank lines
             if [ "$LASTLINE" = "" ] && [ "$line" = "" ]; then
                 continue
             else
+
                 if [[ "$line" == "function "* ]]; then
                     write "## $relfile, line $lineno:"
                 fi

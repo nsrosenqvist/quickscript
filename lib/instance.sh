@@ -5,7 +5,7 @@ LOCK_FILE=""
 ###GLOBALS_END###
 
 function script_dir {
-    echo "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    echo "$(cd "$(dirname "$0")" && pwd)"
 }
 
 function script_name {
