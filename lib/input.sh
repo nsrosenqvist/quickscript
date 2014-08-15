@@ -3,6 +3,11 @@
 source string.sh
 source log.sh
 
+#TODO: delete above
+# Fix FINAL_ARGS
+# remove bottom test code
+# Unset FILE_ARGS, PIPE_ARGS, TERM_ARGS, FINAL_ARGS
+
 ###GLOBALS_START###
 INPUT_TERM=1
 INPUT_PIPE=1
