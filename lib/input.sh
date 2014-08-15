@@ -6,6 +6,6 @@ function ask {
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         return 0
     else
-    return 1
+        return 1
     fi
 }

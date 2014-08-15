@@ -6,7 +6,7 @@ LOG=0
 ###GLOBALS_END###
 
 function time_stamp {
-    echo "$(date "+%Y-%m-%d %T")"
+    echo "$(date '+%Y-%m-%d %T')"
 }
 
 function log_file {
@@ -16,7 +16,6 @@ function log_file {
         echo "/dev/null"
     fi
 }
-
 function log {
     echo "$(time_stamp) $1" >> "$(log_file)"
 }
