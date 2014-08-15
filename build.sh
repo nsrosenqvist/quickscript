@@ -77,6 +77,11 @@ function build {
 
                 # If we're making a DEBUG_COMMENTS build add the lineno for the function
                 if [[ "$line" == "function "* ]] && [ $DEBUG_COMMENTS -eq 0 ]; then
+                    # Make sure the comment doesn't get cramped in
+                    if [ "$lastline" != "" ]; then
+                        write ""
+                    fi
+
                     write "## $relfile, line $lineno:"
                 fi
 
