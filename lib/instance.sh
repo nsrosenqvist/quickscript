@@ -9,7 +9,7 @@ function script_dir {
 }
 
 function script_name {
-    echo "$(basename $0)"
+    echo "$(basename "$0")"
 }
 
 function lock_file {
@@ -62,4 +62,8 @@ function unlock_script {
     if [ -f "$LOCK_FILE" ]; then
         rm -f "$LOCK_FILE"
     fi
+}
+
+function running_instances {
+    echo $(pgrep -fc "$(script_name)")
 }
