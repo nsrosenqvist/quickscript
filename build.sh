@@ -2,15 +2,19 @@
 
 source lib/instance.sh
 source lib/string.sh
+source lib/log.sh
+source lib/input.sh
 
 SCRIPTDIR="$(script_dir)"
 VERSIONNO="0.1"
-LIBNAME="quickscript"
-TEMPFILE="$SCRIPTDIR/.$LIBNAME.tmp"
-BUILTFILE="$SCRIPTDIR/$LIBNAME-$VERSIONNO.sh"
+LIBNAME="QuickScript"
+LIBNAMELOW="$(to_lowercase "$LIBNAME")"
+TEMPFILE="$SCRIPTDIR/.$LIBNAMELOW.tmp"
+LIBFILENAME="$LIBNAMELOW-$VERSIONNO.sh"
+BUILTFILE="$SCRIPTDIR/$LIBFILENAME"
 TARGET="$TEMPFILE"
-STRIP_COMMENTS=1
-DEBUG_COMMENTS=0
+LIB_COMMENTS=1
+DEBUG_COMMENTS=1
 GLOBALS=()
 
 # Shorthand for writing to file
@@ -19,11 +23,35 @@ function write {
 }
 
 function build {
+    OPTALIAS[--DEBUG]=-d
+    OPTALIAS[--STRIP-COMMENTS]=-s
+
+    while qs_opts "ds" opt; do
+        case "$opt" in
+            -d|--debug|--DEBUG)
+                DEBUG_COMMENTS=0
+            ;;
+            -s|--strip-comments|--STRIP-COMMENTS)
+                LIB_COMMENTS=0
+            ;;
+            \?)
+                echo "Non-existent parameter specified: $OPTARG"
+                echo "Aborting..."
+                exit 1
+            ;;
+        esac
+    done
+
     local lastline=""
 
     # Remove previously built file
     if [ -e "$BUILTFILE" ]; then
         rm "$BUILTFILE"
+    fi
+
+    # If tmp file exists, delete as well
+    if [ -e "$TEMPFILE" ]; then
+        rm "$TEMPFILE"
     fi
 
     while IFS= read -r file; do
@@ -70,8 +98,8 @@ function build {
                     continue
                 fi
 
-                # Skip comments if making a STRIP_COMMENTS build
-                if [ $STRIP_COMMENTS -eq 0 ] && [[ "$(trim_leading_whitespace "$line")" == \#* ]]; then
+                # Skip comments if making a LIB_COMMENTS build
+                if [ $LIB_COMMENTS -eq 1 ] && [[ "$(trim_leading_whitespace "$line")" == \#* ]]; then
                     continue
                 fi
 
@@ -98,12 +126,10 @@ function build {
     write "#!/bin/bash"
     write ""
 
-    # Add build info if we're not making a STRIP_COMMENTS build
-    if [ $STRIP_COMMENTS -ne 0 ]; then
-        write "## QuickScript version $VERSIONNO"
-        write "## Build date: $(date '+%Y-%m-%d %T')"
-        write ""
-    fi
+    # Always add build info
+    write "## QuickScript version $VERSIONNO"
+    write "## Build date: $(date '+%Y-%m-%d %T')"
+    write ""
 
     # Append the global variables
     write "QSVERSION=\"$VERSIONNO\""
@@ -122,4 +148,7 @@ function build {
     rm "$TEMPFILE"
 }
 
-build
+# Run build if script isn't being sourced
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then
+    build $*
+fi
