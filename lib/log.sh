@@ -25,9 +25,17 @@ function log_msg {
 }
 
 function log_wrn {
-    echo "$(time_stamp) [WRN] $1" >> "$(log_file)"
+    if [ $# -eq 2 ]; then
+        echo "$(time_stamp) [WRN] (Line: $2) $1" >> "$(log_file)"
+    else
+        echo "$(time_stamp) [WRN] $1" >> "$(log_file)"
+    fi
 }
 
 function log_err {
-    echo "$(time_stamp) [ERR] $1" 1>&2 | tee -a "$(log_file)" #Old: 2>&1
+    if [ $# -eq 2 ]; then
+        echo "$(time_stamp) [ERR] (Line: $2) $1" 1>&2 | tee -a "$(log_file)"
+    else
+        echo "$(time_stamp) [ERR] $1" 1>&2 | tee -a "$(log_file)"
+    fi   
 }
