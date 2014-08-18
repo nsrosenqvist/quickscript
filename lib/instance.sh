@@ -56,6 +56,7 @@ function lock_script {
     fi
 
     touch "$LOCK_FILE"
+    trap 'unlock_script' EXIT
 }
 
 function unlock_script {
