@@ -35,9 +35,17 @@ function install {
 		cp "$BUILTFILE" "$INSTALLDIR/"
 
 		if [ $? -eq 0 ]; then
+			local linkpath=$(echo "$INSTALLDIR/$LIBNAMELOW.sh" | sed 's#//*#/#g')
 			local libpath=$(echo "$INSTALLDIR/$LIBFILENAME" | sed 's#//*#/#g')
+			
+			if [ -h "$linkpath" ]; then
+				rm "$linkpath"
+			fi
+			
+			ln -s "$libpath" "$linkpath"
+			
 			echo "$LIBNAME $VERSIONNO successfully installed to $INSTALLDIR"
-			echo "Start using $LIBNAME by sourcing it into your BASH-scripts: source \"$libpath/\""
+			echo "Start using $LIBNAME by sourcing it into your BASH-scripts: source \"$linkpath/\""
 		else
 			echo "Installation failed!"
 			echo "Make sure you have the right permissions to write to $INSTALLDIR"
