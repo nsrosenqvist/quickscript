@@ -1,19 +1,11 @@
 #!/bin/bash
 
-source string.sh
-source log.sh
-
-#TODO: delete above
-# Fix NONOPT
-# remove bottom test code
-# Unset FILE_ARGS, PIPE_ARGS, TERM_ARGS, NONOPT
-
 ###GLOBALS_START###
 INPUT_TERM=1
 INPUT_PIPE=1
 INPUT_FILE=1
 INPUT_PROCESSED=1
-declare -A OPTALIAS
+declare -Ag OPTALIAS
 OPTARG=""
 OPTORIG=()
 NONOPT=()
@@ -95,14 +87,12 @@ function qs_opts {
     local optvalue=1
     local trimmedargs=""
     local noshift=1
+    local longarg=1
     local aliasarg=1
-
-    #echo "$argument"
+    local singlearg=""
 
     if [[ "$argument" == \-* ]]; then
         # If an alias is matched we translate it
-        originalarg="$argument"
-
         if [ -n "${OPTALIAS[${argument%%=*}]}" ]; then
             argument="${OPTALIAS[${argument%%=*}]}"
         else
@@ -111,9 +101,12 @@ function qs_opts {
 
         # If long argument name has been specified we only check the first character
         if [[ "$argument" == \-\-* ]]; then
-            trimmedargs="$(substring "$argument" 2 1)"
+            trimmedargs="${argument:2:1}"
+            singlearg="${argument:1:2}"
+            longarg=0
         else
-            trimmedargs="$(substring "$argument" 1)"
+            trimmedargs="${argument:1}"
+            singlearg="${argument:0:2}"
         fi
 
         # Mark if multiple flags have been specified in one group
@@ -122,20 +115,18 @@ function qs_opts {
         fi
 
         # Loop through the argument characters to see which flags has been set
-        for ((i=0; i<${#trimmedargs}; i++)); do
-            local trimmedarg="${trimmedargs:i:1}"
+        local trimmedarg="${trimmedargs:0:1}"
 
-            for ((j=0; j<${#opts}; j++)); do
-                if [ $foundopt -eq 0 ]; then
-                    if [ "${opts:$j:1}" = ":" ]; then
-                        requirevalue=0
-                    fi
-                    break 2
+        for ((j=0; j<${#opts}; j++)); do
+            if [ $foundopt -eq 0 ]; then
+                if [ "${opts:$j:1}" = ":" ]; then
+                    requirevalue=0
                 fi
-                if [ "${opts:$j:1}" = "$trimmedarg" ]; then
-                    foundopt=0
-                fi
-            done
+                break
+            fi
+            if [ "${opts:$j:1}" = "$trimmedarg" ]; then
+                foundopt=0
+            fi
         done
 
         # We have our argument saved, we can now shift the array
@@ -149,7 +140,7 @@ function qs_opts {
                     noshift=1
                 else
                     if [ "${#TERM_ARGS[@]}" -le 0 ]; then
-                        log_err "${originalarg%=*} require a value set!"
+                        log_err "$argument require a value set!"
                         exit 1
                     else
                         optvalue="${TERM_ARGS[0]}"
@@ -161,31 +152,34 @@ function qs_opts {
                     OPTIND=$(($OPTIND+1))
                 fi
             else
-                optvalue="${originalarg%=*}"
-                optvalue="${optvalue:0:2}"
+                optvalue="$argument"
             fi
 
             # Reinsert if the flag was grouped
             if [ $noshift -eq 0 ]; then
-                TERM_ARGS=("-$(substring "$originalarg" 2)" "${TERM_ARGS[@]}")
-                eval "$returnvar=${argument:0:2}"
+                TERM_ARGS=("-${originalarg:2}" "${TERM_ARGS[@]}")
+                eval "$returnvar=$singlearg"
             else
                 # New opt/optgroup
                 OPTIND=$(($OPTIND+1))
-                #echo "$argument"
-                eval "$returnvar=$argument"
+                eval "$returnvar=$singlearg"
             fi
         else
             # Reinsert if the flag was grouped
             if [ $noshift -eq 0 ]; then
-                TERM_ARGS=("-$(substring "$argument" 2)" "${TERM_ARGS[@]}")
+                TERM_ARGS=("-${argument:2}" "${TERM_ARGS[@]}")
             else
                 # New opt/optgroup
                 OPTIND=$(($OPTIND+1))
             fi
 
             eval "$returnvar="\?""
-            optvalue="${originalarg%%=*}"
+
+            if [ $longarg -eq 0 ]; then
+                optvalue="$argument"
+            else
+                optvalue="$singlearg"
+            fi
         fi
 
         # Set the value and return
