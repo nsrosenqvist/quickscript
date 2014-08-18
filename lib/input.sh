@@ -95,13 +95,13 @@ function qs_opts {
 
         # If long argument name has been specified we only check the first character
         if [[ "$argument" == \-\-* ]]; then
-            trimmedargs="$(substring "$argument" 2)"
+            trimmedargs="$(substring "$argument" 2 1)"
         else
             trimmedargs="$(substring "$argument" 1)"
         fi
 
         # Mark if multiple flags have been specified in one group
-        if [ ${#trimmedargs} -gt 1 ]; then
+        if [ ${#trimmedargs} -gt 1 ] && [ ]; then
             noshift=0
         fi
 
@@ -130,15 +130,9 @@ function qs_opts {
             if [ $requirevalue -eq 0 ]; then
                 if [[ "$originalarg" == *"="* ]]; then
                     splitstr=(${originalarg//=/ })
-
-                    if [ -n "${splitstr[1]}" ]; then
-                        value="${splitstr[1]}"
-                    else
-                        log_err "${originalarg%=*} require a value set!"
-                        exit 1
-                    fi
+                    value="${splitstr[@]:1}"
                 else
-                    if [ -z "${TERM_ARGS[0]}" ] || [ "${TERM_ARGS[0]}" == \-* ]; then
+                    if [ "${#TERM_ARGS[@]}" -le 0 ]; then
                         log_err "${originalarg%=*} require a value set!"
                         exit 1
                     else
@@ -149,7 +143,7 @@ function qs_opts {
                 # Now when we have our value set we can shift again
                 TERM_ARGS=("${TERM_ARGS[@]:1}")
             else
-                value=0
+                value="${originalarg%=*}"
             fi
 
             # Reinsert if the flag was grouped
@@ -166,7 +160,7 @@ function qs_opts {
             fi
 
             eval "$returnvar="\?""
-            value=1
+            value="${originalarg%=*}"
         fi
 
         # Set the value and return
@@ -179,7 +173,7 @@ function qs_opts {
     return 0
 }
 
-OPTALIAS[--PATH]=-p
+OPTALIAS[--path]=-p
 
 while qs_opts "vnp:" opt; do
     case "$opt" in
@@ -193,6 +187,6 @@ while qs_opts "vnp:" opt; do
             echo "PATH: $OPTARG"
             ;;
         \?)
-            echo "Couldn't find"
+            echo "Couldn't find option $OPTARG"
     esac
 done
