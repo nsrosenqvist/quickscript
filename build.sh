@@ -106,6 +106,8 @@ function build {
     fi
 
     # Append the global variables
+    write "QSVERSION=\"$VERSIONNO\""
+
     for globalvar in "${GLOBALS[@]}"; do
         write "$globalvar"
     done
