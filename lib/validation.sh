@@ -1,10 +1,6 @@
 #!/bin/bash
 
-###GLOBALS_START###
-UNLOCK_ON_ABORT=0
-###GLOBALS_END###
-
-function assert_success {
+function abort_on_failure() {
     if [ $1 -ne 0 ]; then
         message="The script \"$(script_dir)/$(script_name)\" failed"
 
@@ -27,10 +23,6 @@ function assert_success {
             $4
         fi
 
-        # Exit program
-        if [ $UNLOCK_ON_ABORT -eq 0 ]; then
-            unlock_script
-        fi
         exit $1
     fi
 }

@@ -5,26 +5,26 @@ LOG_DIR="/var/log"
 LOG=0
 ###GLOBALS_END###
 
-function time_stamp {
+function time_stamp() {
     echo "$(date '+%Y-%m-%d %T')"
 }
 
-function log_file {
+function log_file() {
     if [ $LOG -eq 0 ]; then
         echo "$LOG_DIR/$(script_name).log"
     else
         echo "/dev/null"
     fi
 }
-function log {
+function log() {
     echo "$(time_stamp) $1" >> "$(log_file)"
 }
 
-function log_msg {
+function log_msg() {
     echo "$(time_stamp) [MSG] $1" >> "$(log_file)"
 }
 
-function log_wrn {
+function log_wrn() {
     if [ $# -eq 2 ]; then
         echo "$(time_stamp) [WRN] (Line: $2) $1" >> "$(log_file)"
     else
@@ -32,7 +32,7 @@ function log_wrn {
     fi
 }
 
-function log_err {
+function log_err() {
     if [ $# -eq 2 ]; then
         echo "$(time_stamp) [ERR] (Line: $2) $1" 1>&2 | tee -a "$(log_file)"
     else

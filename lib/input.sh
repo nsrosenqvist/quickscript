@@ -13,7 +13,7 @@ OPTIND=1
 OPTUPDATECMD='eval set -- "${NONOPT[@]}" && unset NONOPT'
 ###GLOBALS_END###
 
-function ask {
+function ask() {
     read -n 1 -r -p "$1 (y/n) "
 
     if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -23,7 +23,7 @@ function ask {
     fi
 }
 
-function qs_opts {
+function qs_opts() {
     local opts="$1"
     local returnvar="$2"
 
@@ -95,6 +95,7 @@ function qs_opts {
         # If an alias is matched we translate it
         if [ -n "${OPTALIAS[${argument%%=*}]}" ]; then
             argument="${OPTALIAS[${argument%%=*}]}"
+            aliasarg=0
         else
             argument="${argument%%=*}"
         fi
@@ -152,12 +153,24 @@ function qs_opts {
                     OPTIND=$(($OPTIND+1))
                 fi
             else
-                optvalue="$argument"
+                if [ $longarg -eq 0 ]; then
+                    optvalue="$argument"
+                else
+                    optvalue="$singlearg"
+                fi
             fi
+
 
             # Reinsert if the flag was grouped
             if [ $noshift -eq 0 ]; then
                 TERM_ARGS=("-${originalarg:2}" "${TERM_ARGS[@]}")
+                echo "noshift: $originalarg, $argument, $singlearg"
+                if [ $aliasarg -eq 0 ]; then
+                    TERM_ARGS=("-${argument:2}" "${TERM_ARGS[@]}")
+                else
+                    TERM_ARGS=("-${originalarg:2}" "${TERM_ARGS[@]}")
+                fi
+
                 eval "$returnvar=$singlearg"
             else
                 # New opt/optgroup

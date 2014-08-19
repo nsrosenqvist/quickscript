@@ -4,15 +4,15 @@
 LOCK_FILE=""
 ###GLOBALS_END###
 
-function script_dir {
+function script_dir() {
     echo "$(cd "$(dirname "$0")" && pwd)"
 }
 
-function script_name {
+function script_name() {
     echo "$(basename "$0")"
 }
 
-function lock_file {
+function lock_file() {
     generate_file=0
     lock_dir=""
     lock_file=""
@@ -41,9 +41,9 @@ function lock_file {
     echo "$lock_dir/$lock_file"
 }
 
-function lock_script {
+function lock_script() {
     LOCK_FILE="$(lock_file "$1")"
-    verify_success $? "Create a lock file (ERROR: $LOCK_FILE)"
+    abort_on_failure $? "Create a lock file (ERROR: $LOCK_FILE)"
 
     if [ -d "$LOCK_FILE" ]; then
         log_err "A directory exists with the same name as the lock file."
@@ -59,12 +59,12 @@ function lock_script {
     trap 'unlock_script' EXIT
 }
 
-function unlock_script {
+function unlock_script() {
     if [ -f "$LOCK_FILE" ]; then
         rm -f "$LOCK_FILE"
     fi
 }
 
-function running_instances {
+function running_instances() {
     echo $(pgrep -fc "$(script_name)")
 }
