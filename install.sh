@@ -35,15 +35,22 @@ function install {
 		cp "$BUILTFILE" "$INSTALLDIR/"
 
 		if [ $? -eq 0 ]; then
+			# If we've come this far we have the proper permissions
 			local linkpath=$(echo "$INSTALLDIR/$LIBNAMELOW.sh" | sed 's#//*#/#g')
 			local libpath=$(echo "$INSTALLDIR/$LIBFILENAME" | sed 's#//*#/#g')
 			
+			# Create a symbolic link to quickscript.sh
 			if [ -h "$linkpath" ]; then
 				rm "$linkpath"
 			fi
 			
 			ln -s "$libpath" "$linkpath"
+
+			# Set permissions
+			chmod 755 "$libpath"
+			chmod 755 "$linkpath"
 			
+			# Successfully built
 			echo "$LIBNAME $VERSIONNO successfully installed to $INSTALLDIR"
 			echo "Start using $LIBNAME by sourcing it into your BASH-scripts: source \"$linkpath/\""
 		else
