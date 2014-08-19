@@ -24,14 +24,14 @@ function write {
 
 function build {
     OPTALIAS[--DEBUG]=-d
-    OPTALIAS[--STRIP-COMMENTS]=-s
+    OPTALIAS[--COMMENTS]=-c
 
-    while qs_opts "ds" opt; do
+    while qs_opts "dc" opt; do
         case "$opt" in
             -d|--debug|--DEBUG)
                 DEBUG_COMMENTS=0
             ;;
-            -s|--strip-comments|--STRIP-COMMENTS)
+            -c|--comments|--COMMENTS)
                 LIB_COMMENTS=0
             ;;
             \?)

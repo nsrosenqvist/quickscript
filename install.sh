@@ -27,7 +27,7 @@ function install {
 
 	# Rebuild project
 	echo "Building $LIBNAME $VERSIONNO..."
-	build --STRIP-COMMENTS
+	build
 
 	# If the build was successful, install it to $INSTALLDIR
 	if [ $? -eq 0 ]; then
