@@ -14,7 +14,7 @@ if [ ! -h "$(script_dir)/$LIBNAMELOW.sh" ]; then
 fi
 
 # Run all tests
-while IFS= read -r file; do
+for file in "tests/"*".sh"; do
 	echo "Running test-file \"$(basename "$file")\":"
 	(bash "$file")
-done < <(find "$(script_dir)/tests" -maxdepth 1 -type f -name "*.sh" | sort -V)
+done
