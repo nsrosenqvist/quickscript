@@ -6,36 +6,42 @@ source lib/log.sh
 source lib/input.sh
 
 SCRIPTDIR="$(script_dir)"
-VERSIONNO="0.1"
+BUILDDIR="$SCRIPTDIR/build/debug/"
 LIBNAME="QuickScript"
 LIBNAMELOW="$(to_lowercase "$LIBNAME")"
-LIBFILENAME="$LIBNAMELOW-$VERSIONNO.sh"
-TEMPFILE="$SCRIPTDIR/.$LIBNAMELOW.tmp"
-BUILTFILE="$SCRIPTDIR/$LIBFILENAME"
-TARGET="$TEMPFILE"
-LIB_COMMENTS=1
-DEBUG_COMMENTS=1
+TEMPFILE="$BUILDDIR/.$LIBNAMELOW.tmp"
+LIBFILENAME=""
+BUILTFILE=""
+VERSIONNO="debug"
+
+LIB_COMMENTS=0
 GLOBALS=()
+WRITE_TARGET="$TEMPFILE"
 
 # Shorthand for writing to file
 function write {
-    echo "$1" >> "$TARGET"
+    echo "$1" >> "$WRITE_TARGET"
 }
 
 function build {
-    OPTALIAS[--DEBUG]=-d
-    OPTALIAS[--COMMENTS]=-c
+    OPTALIAS[--STRIP-COMMENTS]=-s
+    OPTALIAS[--VERSION]=-v
 
-    while qs_opts "dc" opt; do
+    while qs_opts "sv:" opt; do
         case "$opt" in
-            -d|--debug|--DEBUG)
-                DEBUG_COMMENTS=0
+            -s|--strip-comments|--STRIP-COMMENTS)
+                LIB_COMMENTS=1
             ;;
-            -c|--comments|--COMMENTS)
-                LIB_COMMENTS=0
+            -v|--version|--VERSION)
+                VERSIONNO="$OPTARG"
             ;;
             \?)
                 echo "Non-existent parameter specified: $OPTARG"
+                echo "Aborting..."
+                exit 1
+            ;;
+            \!)
+                echo "$OPTARG requires a value specified"
                 echo "Aborting..."
                 exit 1
             ;;
@@ -43,6 +49,11 @@ function build {
     done
 
     local lastline=""
+    LIBFILENAME="$LIBNAMELOW-$VERSIONNO.sh"
+    BUILTFILE="$BUILDDIR/$LIBFILENAME"
+
+    # Make sure that the build dir exists
+    mkdir -p "$BUILDDIR"
 
     # Remove previously built file
     if [ -e "$BUILTFILE" ]; then
@@ -54,6 +65,10 @@ function build {
         rm "$TEMPFILE"
     fi
 
+    # Make sure the tmp file gets deleted at end
+    trap "rm -f '$TEMPFILE'" EXIT INT HUP TERM QUIT
+
+    # Loop through all lib-files
     while IFS= read -r file; do
         local globalsection=1
         local lineno=0
@@ -65,8 +80,8 @@ function build {
             lastline=""
         fi
 
-        # Add extra build information if DEBUG_COMMENTS
-        if [ $DEBUG_COMMENTS -eq 0 ]; then
+        # Add extra build information if LIB_COMMENTS
+        if [ $LIB_COMMENTS -eq 0 ]; then
             write "### File \"$relfile\":"
         fi
 
@@ -103,8 +118,8 @@ function build {
                     continue
                 fi
 
-                # If we're making a DEBUG_COMMENTS build add the lineno for the function
-                if [[ "$line" == "function "* ]] && [ $DEBUG_COMMENTS -eq 0 ]; then
+                # If we're making a LIB_COMMENTS build add the lineno for the function
+                if [[ "$line" == "function "* ]] && [ $LIB_COMMENTS -eq 0 ]; then
                     # Make sure the comment doesn't get cramped in
                     if [ "$lastline" != "" ]; then
                         write ""
@@ -121,7 +136,8 @@ function build {
     done < <(find "$SCRIPTDIR/lib" -maxdepth 1 -type f -name "*.sh" | sort -V)
 
     # Change write target to the final output file
-    TARGET="$BUILTFILE"
+    write ""
+    WRITE_TARGET="$BUILTFILE"
 
     write "#!/bin/bash"
     write ""
@@ -143,9 +159,6 @@ function build {
     while IFS= read -r line; do
         write "$line"
     done < "$TEMPFILE"
-
-    # Remove temp file
-    rm "$TEMPFILE"
 }
 
 # Run build if script isn't being sourced
