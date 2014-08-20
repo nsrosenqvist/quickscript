@@ -27,6 +27,5 @@ function is_mountpoint() {
         fi
     fi
 
-    echo $is_mounted
     return $is_mounted
 }

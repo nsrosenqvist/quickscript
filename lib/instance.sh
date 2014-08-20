@@ -45,29 +45,24 @@ function lock_script() {
     LOCK_FILE="$(lock_file)"
 
     # Try to create a lock file with the mkdir technique
-    if [ ! mkdir "$LOCK_FILE" ]; then
+    if ! mkdir "$LOCK_FILE"; then
         echo "Error: This script is locked ($LOCK_FILE)" 1>&2
         exit 1
     fi
 
     # Make sure the script gets unlocked upon exit
     trap 'unlock_script' EXIT INT HUP TERM QUIT
+    return 0
 }
 
 function unlock_script() {
     if [ -e "$LOCK_FILE" ]; then
         rm -Rf "$LOCK_FILE"
     fi
+
+    return 0
 }
 
 function running_instances() {
     echo $(pgrep -fc "$(script_name)")
-}
-
-function allow_no_errors {
-    set -e
-}
-
-function allow_errors {
-    set +e
 }

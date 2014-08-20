@@ -6,7 +6,7 @@ function abort_if_failure() {
 
         # Add error descriptor
         if [ $# -ge 2 ]; then
-            message="$message at step: \"$2\""
+            message="$message: \"$2\""
         else
             message="$message."
         fi
@@ -25,4 +25,14 @@ function abort_if_failure() {
 
         exit $1
     fi
+}
+
+function allow_no_errors {
+    set -e
+    return $?
+}
+
+function allow_errors {
+    set +e
+    return $?
 }
