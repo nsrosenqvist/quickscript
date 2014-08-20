@@ -54,6 +54,11 @@ function testCompareVersions() {
 	compare_versions 1..0 "=" 1.0.0.0 && assertEquals 0 $?
 	compare_versions 1.3 "=" 1.0.2.0 && assertNotEquals 0 $?
 	compare_versions 1..0.43 "=" 1.0.0.0 && assertNotEquals 0 $?
+
+	compare_versions 1 "!=" 1 && assertNotEquals 0 $?
+	compare_versions 1.1.1 "!=" 1.01.1 && assertNotEquals 0 $?
+	compare_versions 1.0.3 "!=" 1.0.2.0 && assertEquals 0 $?
+	compare_versions 0.3 "!=" 1.0.2.0 && assertEquals 0 $?
 	
 	compare_versions 3.2.1.9.81444 ">" 3.2 && assertEquals 0 $?
 	compare_versions 1..1 ">" 1.0 && assertEquals 0 $?

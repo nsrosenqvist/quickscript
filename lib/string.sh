@@ -73,10 +73,17 @@ function compare_versions() {
         fi
     done
 
+    # ne
+    if  [ "$comp" = "!=" ]; then
+        for ((i=0; i<${#ver1[@]}; i++)); do
+            if ((10#${ver1[i]} != 10#${ver2[i]})); then
+                return 0
+            fi
+        done
+    fi
     # gt ge
     if  [ "$comp" = ">" ] ||  [ "$comp" = ">=" ]; then
         for ((i=0; i<${#ver1[@]}; i++)); do
-            # echo "$((10#${ver1[i]})) : $((10#${ver2[i]}))"
             if ((10#${ver1[i]} > 10#${ver2[i]})); then
                 return 0
             else
