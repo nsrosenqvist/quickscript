@@ -11,7 +11,7 @@ function file_name() {
 }
 
 function strip_multi_slash() {
-	echo "$1" | sed 's#//*#/#g'
+    echo "$1" | sed 's#//*#/#g'
 }
 
 function is_mountpoint() {
@@ -28,4 +28,16 @@ function is_mountpoint() {
     fi
 
     return $is_mounted
+}
+
+function make_tempdir() {
+    local dir="$(dirname "$0")/.$(basename "$0").$$.tmp"
+    
+    if mkdir "$dir"; then
+    	echo "$dir"
+    	trap "rm -Rf '$dir'" EXIT INT HUP TERM QUIT
+    	return 0
+    else
+    	return 1
+    fi
 }
