@@ -15,10 +15,10 @@ function testStripMultiSlash() {
 }
 
 function testIsMountPoint() {
-	assertEquals "Failed to recognize /" 0 $(is_mountpoint "/")
-	assertEquals "Failed to recognize / and find /etc" 0 $(is_mountpoint "/" "/etc")
-	assertNotEquals "Wrongly recognized /non-existing-location.i-promise" 0 $(is_mountpoint "/non-existing-location.i-promise")
-	assertNotEquals "Recognized / and wrongly found /non-existing-location.i-promise" 0 $(is_mountpoint "/" "/non-existing-location.i-promise")
+	is_mountpoint "/" && assertEquals "Failed to recognize /" 0 $?
+	is_mountpoint "/" "/etc" && assertEquals "Failed to recognize / and find /etc" 0 $?
+	is_mountpoint "/non-existing-location.i-promise" && assertNotEquals "Wrongly recognized /non-existing-location.i-promise" 0 $?
+	is_mountpoint "/" "/non-existing-location.i-promise" && assertNotEquals "Recognized / and wrongly found /non-existing-location.i-promise" 0 $?
 }
 
 cd "$oldpwd" && . shunit2

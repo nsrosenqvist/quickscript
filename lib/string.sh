@@ -48,33 +48,62 @@ function capitalize() {
     echo "${1^}"
 }
 
-function cmp_version() {
-    if [[ $1 == $2 ]]; then
-        return 0
+function compare_versions() {
+    local comp="$2"
+
+    if [ "$1" = "$3" ]; then
+        if [ "$2" = "=" ] || [ "$2" = ">=" ] ||  [ "$2" = "<=" ]; then
+            return 0
+        fi
     fi
 
     local IFS=.
-    local i ver1=($1) ver2=($2)
+    local ver1=($1)
+    local ver2=($3)    
+
     # fill empty fields in ver1 with zeros
-    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
-    do
+    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
         ver1[i]=0
     done
-    for ((i=0; i<${#ver1[@]}; i++))
-    do
-        if [[ -z ${ver2[i]} ]]
-        then
-            # fill empty fields in ver2 with zeros
+
+    # fill empty fields in ver2 with zeros
+    for ((i=0; i<${#ver1[@]}; i++)); do
+        if [[ -z ${ver2[i]} ]]; then
             ver2[i]=0
         fi
-        if ((10#${ver1[i]} > 10#${ver2[i]}))
-        then
-            return 1
-        fi
-        if ((10#${ver1[i]} < 10#${ver2[i]}))
-        then
-            return 2
-        fi
     done
-    return 0
+
+    # gt ge
+    if  [ "$comp" = ">" ] ||  [ "$comp" = ">=" ]; then
+        for ((i=0; i<${#ver1[@]}; i++)); do
+            # echo "$((10#${ver1[i]})) : $((10#${ver2[i]}))"
+            if ((10#${ver1[i]} > 10#${ver2[i]})); then
+                return 0
+            else
+                return 1
+            fi
+        done
+    fi
+    # eq ge le
+    if  [ "$comp" = "=" ] ||  [ "$comp" = ">=" ] ||  [ "$comp" = "<=" ]; then
+        for ((i=0; i<${#ver1[@]}; i++)); do
+            if ((10#${ver1[i]} != 10#${ver2[i]})); then
+                return 1
+            fi
+        done
+
+        return 0
+    fi
+    # lt le
+    if  [ "$comp" = "<" ] ||  [ "$comp" = "<=" ]; then
+        for ((i=0; i<${#ver1[@]}; i++)); do
+            if ((10#${ver1[i]} < 10#${ver2[i]})); then
+                return 0
+            else
+                return 1
+            fi
+        done
+    fi
+    
+    return 1
 }

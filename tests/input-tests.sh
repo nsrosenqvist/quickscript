@@ -8,7 +8,7 @@ function oneTimeSetUp() {
 	qsopts_input_tmpfile="$(dirname "$0")/.testQSOptsInput.tmp"
 
 	cat << 'EOF' > "$qsopts_tmpfile"
-		cd "$(dirname "$0")" && source ../quickscript.sh
+		cd "$(dirname "$0")" && source ../lib/input.sh
 		OPTALIAS[--DIR]=-p
 		OPTALIAS[--VERBOSE]=-v
 		OPTALIAS[--MODE-DETAILED]=-vn
