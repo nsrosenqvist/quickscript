@@ -21,4 +21,16 @@ function testIsMountPoint() {
 	is_mountpoint "/" "/non-existing-location.i-promise" && assertNotEquals "Recognized / and wrongly found /non-existing-location.i-promise" 0 $?
 }
 
+function testTempdir() {
+    assertNotNull "Temp dir path didn't get returned" "$(tempdir)"
+}
+
+function testMakeTempdir() {
+    local tmp="$(tempdir)"
+    make_tempdir
+    assertTrue "Temp dir failed to get created" "[ -d "$tmp" ]"
+    (make_tempdir) > /dev/null 2>&1
+    assertNotEquals "make_tempdir didn't return non-zero" 0 $?
+}
+
 cd "$oldpwd" && . shunit2

@@ -30,9 +30,13 @@ function is_mountpoint() {
     return $is_mounted
 }
 
+function tempdir() {
+    echo "$(dirname "$0")/.$(basename "$0").$$.tmp"
+}
+
 function make_tempdir() {
-    local dir="$(dirname "$0")/.$(basename "$0").$$.tmp"
-    
+    local dir="$(tempdir)"
+
     if mkdir "$dir"; then
     	echo "$dir"
     	trap "rm -Rf '$dir'" EXIT INT HUP TERM QUIT
@@ -40,4 +44,9 @@ function make_tempdir() {
     else
     	return 1
     fi
+}
+
+function remove_tempdir() {
+    rm -Rf "$(tempdir)"
+    return $?
 }
