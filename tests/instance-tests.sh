@@ -1,6 +1,6 @@
 #!/bin/bash
 
-oldpwd="$(pwd)" && cd "$(dirname "$0")" && source ../quickscript.sh
+oldpwd="$(pwd)" && cd "$(dirname "$0")" && source ../lib/instance.sh
 
 function testLockScript() {
 	local lock_file="$(lock_file)"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-oldpwd="$(pwd)" && cd "$(dirname "$0")" && source ../quickscript.sh
+oldpwd="$(pwd)" && cd "$(dirname "$0")" && source ../lib/input.sh
 
 function oneTimeSetUp() {
 	ask_tmpfile="$(dirname "$0")/.testAskReponse.tmp"

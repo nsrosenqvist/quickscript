@@ -1,6 +1,6 @@
 #!/bin/bash
 
-oldpwd="$(pwd)" && cd "$(dirname "$0")" && source ../quickscript.sh
+oldpwd="$(pwd)" && cd "$(dirname "$0")" && source ../lib/files.sh
 
 function testFileExtension() {
 	assertEquals "txt" "$(file_extension "very-long.file.name.txt")"
