@@ -30,8 +30,8 @@ function qs_opts() {
 
     # Validate options specified
     if [ -z "$opts" ] || [ -z "$returnvar" ]; then
-        log_err "You must specify both parsing options and an output variable."
-        exit 1
+        echo "Error: You must specify both parsing options and an output variable." 1>&2
+        return 1
     fi
 
     # Process the script's input if it hasn't been processed already
@@ -163,8 +163,8 @@ function qs_opts() {
                 else
                     # The value should be the next argument
                     if [ "${#TERM_ARGS[@]}" -le 0 ]; then
-                        log_err "$originalopt require a value set!"
-                        exit 1
+                        optvalue="$singleopt"
+                        singleopt=\!
                     else
                         optvalue="${TERM_ARGS[0]}"
                     fi
@@ -176,7 +176,7 @@ function qs_opts() {
                 fi
             else
                 # The opt doesn't require a value, so we set it to the opt name
-                optvalue="$singleopt"    
+                optvalue="$singleopt"
             fi
 
             # Reinsert if the opt was grouped

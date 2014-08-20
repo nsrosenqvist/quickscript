@@ -11,7 +11,7 @@ function time_stamp() {
 
 function log_file() {
     if [ $LOG -eq 0 ]; then
-        echo "$LOG_DIR/$(script_name).log"
+        echo "$LOG_DIR/$(basename "$0").log"
     else
         echo "/dev/null"
     fi

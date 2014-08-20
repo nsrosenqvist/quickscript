@@ -13,9 +13,9 @@ function script_name() {
 }
 
 function lock_file() {
-    generate_file=0
-    lock_dir=""
-    lock_file=""
+    local generate_file=0
+    local lock_dir=""
+    local lock_file=""
 
     # Check if lock file is predefined
     if [ -n "$LOCK_FILE" ]; then
@@ -23,18 +23,18 @@ function lock_file() {
         lock_dir="$(dirname $LOCK_FILE)"
         lock_file="$(basename $LOCK_FILE)"
     else
-        # Generate lock file
-        if [ $# -ne 0 ] && [ -n "$1" ]; then
-            lock_dir="$1"
-        else
-            lock_dir="$(script_dir)"
-        fi
-
+        # Generate lock file        
         lock_file="$(basename "$0").lock"
+        lock_dir="$(script_dir)"
+
+        # Make sure that the lock file is hidden
+        if [ "${lock_file:0:1}" != "." ]; then
+            lock_file=".$lock_file"
+        fi
     fi
 
     if [ ! -d "$lock_dir" ]; then
-        log_err "Can't find lock file directory: \"$lock_dir\""
+        echo "Error: Can't find lock file directory: \"$lock_dir\"" 1>&2
         exit 1
     fi
 
@@ -42,29 +42,32 @@ function lock_file() {
 }
 
 function lock_script() {
-    LOCK_FILE="$(lock_file "$1")"
-    abort_on_failure $? "Create a lock file (ERROR: $LOCK_FILE)"
+    LOCK_FILE="$(lock_file)"
 
-    if [ -d "$LOCK_FILE" ]; then
-        log_err "A directory exists with the same name as the lock file."
+    # Try to create a lock file with the mkdir technique
+    if [ ! mkdir "$LOCK_FILE" ]; then
+        echo "Error: This script is locked ($LOCK_FILE)" 1>&2
         exit 1
     fi
 
-    if [ -f "$LOCK_FILE" ]; then
-        log_err "This script is blocked by a lock file at: $LOCK_FILE"
-        exit 2
-    fi
-
-    touch "$LOCK_FILE"
-    trap 'unlock_script' EXIT
+    # Make sure the script gets unlocked upon exit
+    trap 'unlock_script' EXIT INT HUP TERM QUIT
 }
 
 function unlock_script() {
-    if [ -f "$LOCK_FILE" ]; then
-        rm -f "$LOCK_FILE"
+    if [ -e "$LOCK_FILE" ]; then
+        rm -Rf "$LOCK_FILE"
     fi
 }
 
 function running_instances() {
     echo $(pgrep -fc "$(script_name)")
+}
+
+function allow_no_errors {
+    set -e
+}
+
+function allow_errors {
+    set +e
 }

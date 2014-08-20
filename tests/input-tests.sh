@@ -6,6 +6,27 @@ function oneTimeSetUp() {
 	ask_tmpfile="$(dirname "$0")/.testAskReponse.tmp"
 	qsopts_tmpfile="$(dirname "$0")/.testQSOptsScript.tmp"
 	qsopts_input_tmpfile="$(dirname "$0")/.testQSOptsInput.tmp"
+
+	cat << 'EOF' > "$qsopts_tmpfile"
+		cd "$(dirname "$0")" && source ../quickscript.sh
+		OPTALIAS[--DIR]=-p
+		OPTALIAS[--VERBOSE]=-v
+		OPTALIAS[--MODE-DETAILED]=-vn
+		OPTALIAS[--ALL]=-vnp
+
+		while qs_opts "vnp:" opt $*; do
+		    case "$opt" in
+		        -v) echo -n "v($OPTARG)";;
+		        -n) echo -n "n($OPTARG)";;
+		        -p) echo -n "p($OPTARG)";;
+		        \?) echo -n "nofound($OPTARG)";;
+                \!) echo -n "error($OPTARG)";;
+		    esac
+		done
+
+		eval "$OPTUPDATECMD"
+		echo -n "$2"
+EOF
 }
 
 function oneTimeTearDown() {
@@ -36,28 +57,11 @@ function testQSOpts() {
 	local output=""
 	local expected=""
 
-	cat << 'EOF' > "$qsopts_tmpfile"
-		cd "$(dirname "$0")" && source ../quickscript.sh
-		OPTALIAS[--DIR]=-p
-		OPTALIAS[--VERBOSE]=-v
-		OPTALIAS[--MODE-DETAILED]=-vn
-		OPTALIAS[--ALL]=-vnp
+	(qs_opts "vnp") > /dev/null 2>&1
+	assertNotEquals "Failed to handle erroneous parameters" 0 $?
 
-		while qs_opts "vnp:" opt $*; do
-		    case "$opt" in
-		        -v) echo -n "v($OPTARG)";;
-		        -n) echo -n "n($OPTARG)";;
-		        -p) echo -n "p($OPTARG)";;
-		        \?) echo -n "error($OPTARG)";;
-		    esac
-		done
-
-		eval "$OPTUPDATECMD"
-		echo -n "$2"
-EOF
-
-	output="$(bash "$qsopts_tmpfile" -on --ERROR --ERROR="/dev/null")"
-	expected="error(-o)n(-n)error(--ERROR)error(--ERROR)"
+	output="$(bash "$qsopts_tmpfile" -on --NONE --NONE="/dev/null" -p)"
+	expected="nofound(-o)n(-n)nofound(--NONE)nofound(--NONE)error(-p)"
 	assertEquals "Failed to handle erroneous opts" "$expected" "$output"
 
 	output="$(bash "$qsopts_tmpfile" -vn)"
