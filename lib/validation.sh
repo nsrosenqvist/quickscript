@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function abort_on_failure() {
+function abort_if_failure() {
     if [ $1 -ne 0 ]; then
         message="The script \"$(script_dir)/$(script_name)\" failed"
 
