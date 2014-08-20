@@ -10,7 +10,7 @@ OPTARG="" # Compatibility with getops
 OPTORIG=() # The original command line input
 NONOPT=() # Arguments that aren't considered options
 OPTIND=1 # Compatibility with getopts
-OPTUPDATECMD='eval set -- "${NONOPT[@]}" && unset NONOPT' # Command to update input
+OPTUPDATECMD='eval set -- "${NONOPT[@]}"' # Command to update input
 ###GLOBALS_END###
 
 function ask() {
@@ -83,10 +83,6 @@ function qs_opts() {
         # Return 1 and exit loop if all input has been processed
         if [ ${#TERM_ARGS[@]} -eq 0 ]; then
             NONOPT+=("${PIPE_ARGS[@]}" "${FILE_ARGS[@]}")
-
-            unset FILE_ARGS
-            unset PIPE_ARGS
-            unset TERM_ARGS
             return 1
         fi
     fi
