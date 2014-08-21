@@ -1,15 +1,15 @@
 #!/bin/bash
 
 function trim_whitespace() {
-    echo "$1" | sed -e 's/^ *//' -e 's/ *$//'
+    echo "$1" | sed -e 's/^[ \t]*//;s/[ \t]*$//'
 }
 
 function trim_leading_whitespace() {
-    echo "$1" | sed -e 's/^ *//'
+    echo "$1" | sed -e 's/^[ \t]*//'
 }
 
 function trim_trailing_whitespace() {
-    echo "$1" | sed -e 's/ *$//'
+    echo "$1" | sed -e 's/[ \t]*$//'
 }
 
 function string_replace() {
@@ -59,7 +59,7 @@ function compare_versions() {
 
     local IFS=.
     local ver1=($1)
-    local ver2=($3)    
+    local ver2=($3)
 
     # fill empty fields in ver1 with zeros
     for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
@@ -111,6 +111,6 @@ function compare_versions() {
             fi
         done
     fi
-    
+
     return 1
 }
