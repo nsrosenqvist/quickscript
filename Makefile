@@ -12,7 +12,7 @@ LINK_NAME=$(NAME).sh
 all:: release
 
 docs:
-	shocker -fTC -o docs/api lib
+	shocker -fTG -o docs/api lib
 	echo "$$(cat WIKI.md)" > .docindex.tmp
 	tail -n +4 docs/Home.md >> .docindex.tmp
 	mv .docindex.tmp docs/Home.md
