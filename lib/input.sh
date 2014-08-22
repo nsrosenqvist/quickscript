@@ -1,18 +1,25 @@
 #!/bin/bash
 
 ###GLOBALS_START###
-INPUT_PROCESSED=1 # Reset to use qs_opts again in same script
-INPUT_TERM=1 # Flag for terminal input
-INPUT_PIPE=1 # Flag for pipe input
-INPUT_FILE=1 # Flag for file input
-declare -Ag OPTALIAS # Aliases for options or groups of options
-OPTARG="" # Compatibility with getops
-OPTORIG=() # The original command line input
-NONOPT=() # Arguments that aren't considered options
-OPTIND=1 # Compatibility with getopts
-OPTUPDATECMD='eval set -- "${NONOPT[@]}"' # Command to update input
+INPUT_PROCESSED=1
+INPUT_TERM=1
+INPUT_PIPE=1
+INPUT_FILE=1
+declare -Ag OPTALIAS
+OPTARG=""
+OPTORIG=()
+NONOPT=()
+OPTIND=1
+OPTUPDATECMD='eval set -- "${NONOPT[@]}"'
 ###GLOBALS_END###
 
+#/
+# Prints the question specified and lets the user answer yes or no
+#
+# @param string $1 The question proposed
+# @return int      Returns 0 if the user answered "yes" and "1" if no
+# @author          Niklas Rosenqvist
+#/
 function ask() {
     read -n 1 -r -p "$1 (y/n) "
 
@@ -23,6 +30,49 @@ function ask() {
     fi
 }
 
+#/
+# A better featured alternative to traditional getopts
+#
+# It's almost a complete drop-in replacement for getopts. OPTARG and
+# OPTIND gets set but the returned variable gets set with the hyphen
+# remaining, e.g. "-v" instead "v". Options are specified in the same
+# way but the preceding colon doesn't alter the output. A subsequent colon
+# however still specifies that the option requires a set value. \n\n
+#
+# Variables that requires set values can have the value specified in two ways:
+# either as a subsequent argument or by using an equal sign, `-p "/path"`, `-p="/path"`\n\n
+# 
+# Global variables that get set:\n
+# - PIPE_ARGS - An array containing all arguments that has been piped to the script\n
+# - FILE_ARGS - An array containing all arguments that has been redirected from file\n
+# - TERM_ARGS - An array containing all arguments that was entered from the terminal\n
+# - NONOPT - An array with the arguments that weren't considered options ($1, $2, etc.)\n
+# - OPTORIG - An array with the original terminal input\n
+# - OPTALIAS - An assocative array that lets you specify aliases to options and option groups.
+#              Even though qs_opts supports long arguments such as --path, the aliases must
+#              point to the short versions of the options since long options get matched by
+#              checking the first letter: --path = -p.
+#              So two examples would be: `OPTALIAS[--VERBOSE]=-v` and `OPTALIAS[--ALL]=-vnp`\n
+# - INPUT_PROCESSED - A boolean indicating if the input has been processed or not, set to 0
+#                     too be able to run qs_opts again.\n
+# - INPUT_PIPE - Boolean indicating if we received input from pipe.\n
+# - INPUT_FILE - Boolean indicating if we received input redirected from file.\n
+# - INPUT_TERM - Boolean indicating if we received input from terminal.\n
+# - OPTUPDATECMD - If you don't want to limit what position the user places arguments and options,
+#                  in the way that getopts is limited to that all options must be placed before
+#                  the arguments, you run this saved command to reset $1, $2, $3, etc. appropriately:
+#                  `eval "$OPTUPDATECMD"`
+#
+# @param string $1 The options that are available: e.g. "vnp:Ot:"
+# @param string $2 The variable that gets set with the return value
+# @param any    $3 Optionally you can add as many arguments to process as you want
+#                  which can be useful if using qs_opts within functions. Then you can pass
+#                  $* since qs_opts otherwise processes the originally supplied arguments
+#                  by getting them through `${BASH_ARGV}`
+# @return string   Either the matched short version of an option or "?" if the option don't exist
+#                  or "!" if the option requires a value and none was provided.
+# @author          Niklas Rosenqvist
+#/
 function qs_opts() {
     local opts="$1"
     local returnvar="$2"

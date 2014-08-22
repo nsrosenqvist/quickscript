@@ -28,6 +28,6 @@ sudo apt-get install shunit2
 
 ## Notices
 
-The library is licensed under MIT which means that you are free to reuse the entire library or parts of it and integrate into your scripts without worrying about licensing issues. If you make improvements, please consider making a pull request.
+The library is in the Public Domain (see the file UNLICENSE for info) which means that you are free to reuse the entire library or parts of it and integrate into your scripts without worrying about licensing issues. If you make improvements, please consider making a pull request.
 
 This library is a work in progress, I'm adding as long as I go and if you want something to use as a base for all your future BASH projects then you should probably wait until 1.0.0

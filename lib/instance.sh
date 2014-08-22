@@ -4,14 +4,32 @@
 LOCK_FILE=""
 ###GLOBALS_END###
 
+#/
+# Returns the directory of the current script
+#
+# @return string The directory containing this script that is being run
+# @author        Niklas Rosenqvist
+#/
 function script_dir() {
     echo "$(cd "$(dirname "$0")" && pwd)"
 }
 
+#/
+# Returns the name of the current script
+#
+# @return string Returns the current script's name
+# @author        Niklas Rosenqvist
+#/
 function script_name() {
     echo "$(basename "$0")"
 }
 
+#/
+# Returns the name of the lock_file which this script would use
+#
+# @return string The lock file/directory's name
+# @author        Niklas Rosenqvist
+#/
 function lock_file() {
     local generate_file=0
     local lock_dir=""
@@ -41,6 +59,17 @@ function lock_file() {
     echo "$lock_dir/$lock_file"
 }
 
+#/
+# Creates the lock dir that would hinder other instances of this script to run
+#
+# To use a lock script then the function "lock_script" would have to be run at
+# the top of a script and then the lock file would automatically be deleted
+# when the script ends.
+#
+# @return int Returns 0 if a file was successfully created, if it already existed
+#                       the script would instantly terminate.
+# @author               Niklas Rosenqvist
+#/
 function lock_script() {
     LOCK_FILE="$(lock_file)"
 
@@ -55,14 +84,27 @@ function lock_script() {
     return 0
 }
 
+#/
+# Enables the user to unlock the script manually
+#
+# @return int Returns 0 if successful and otherwise non-zero
+# @author     Niklas Rosenqvist
+#/
 function unlock_script() {
     if [ -e "$LOCK_FILE" ]; then
         rm -Rf "$LOCK_FILE"
+        return $?
     fi
 
     return 0
 }
 
+#/
+# Returns the number of running instances of this script
+#
+# @return int The number of instances
+# @author     Niklas Rosenqvist
+#/
 function running_instances() {
     echo $(pgrep -fc "$(script_name)")
 }

@@ -11,6 +11,12 @@ LINK_NAME=$(NAME).sh
 
 all:: release
 
+docs:
+	shocker -fTC -o docs/api lib
+	echo "$$(cat WIKI.md)" > .docindex.tmp
+	tail -n +4 docs/Home.md >> .docindex.tmp
+	mv .docindex.tmp docs/Home.md
+
 build:
 	./build.sh --VERSION=$(VERSION)
 
@@ -25,7 +31,7 @@ tag:
 	git tag v$(VERSION)
 	git push --tags
 
-release: build
+release: build docs
 	mkdir -p "$(BUILD_DIR)/dist"
 	cp "$(BUILD_DIR)/debug/$(PKG_NAME)" "$(BUILD_DIR)/dist/$(PKG_NAME)"
 
@@ -51,4 +57,4 @@ uninstall:
 
 	if [ -h "$(INSTALL_DIR)/$(LINK_NAME)" ]; then rm -f "$(INSTALL_DIR)/$(LINK_NAME)"; fi
 
-.PHONY: build clean test tag release install uninstall all
+.PHONY: build clean test tag release install uninstall all docs
