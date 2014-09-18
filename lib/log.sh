@@ -2,6 +2,9 @@
 
 ###GLOBALS_START###
 LOG_DIR="/var/log"
+LOG_STD="/var/log/std.log"
+LOG_ERR="/var/log/std_err.log"
+LOG_SYSLOG=0
 LOG=0
 ###GLOBALS_END###
 
@@ -88,5 +91,5 @@ function log_err() {
         echo "$(time_stamp) [ERR] (Line: $2) $1" 1>&2 | tee -a "$(log_file)"
     else
         echo "$(time_stamp) [ERR] $1" 1>&2 | tee -a "$(log_file)"
-    fi   
+    fi
 }
