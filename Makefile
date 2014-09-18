@@ -9,7 +9,7 @@ TESTS_DIR=tests
 PKG_NAME=$(NAME)-$(VERSION).sh
 LINK_NAME=$(NAME).sh
 
-all:: release
+all:: build
 
 docs:
 	shocker -fTG -o docs/api lib
