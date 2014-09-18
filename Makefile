@@ -18,6 +18,8 @@ docs:
 	mv .docindex.tmp docs/Home.md
 
 build:
+	mkdir -p "$(BUILD_DIR)/dist"
+	mkdir -p "$(BUILD_DIR)/debug"
 	./build.sh --VERSION=$(VERSION)
 
 clean:
@@ -32,7 +34,6 @@ tag:
 	git push --tags
 
 release: build docs
-	mkdir -p "$(BUILD_DIR)/dist"
 	cp "$(BUILD_DIR)/debug/$(PKG_NAME)" "$(BUILD_DIR)/dist/$(PKG_NAME)"
 
 install:
@@ -40,6 +41,9 @@ install:
 	@echo
 
 	mkdir -p "$(INSTALL_DIR)"
+
+	if [ ! -f "$(BUILD_DIR)/dist/$(PKG_NAME)" ]; then cp "$(BUILD_DIR)/debug/$(PKG_NAME)" "$(BUILD_DIR)/dist/$(PKG_NAME)"; fi
+
 	cp "$(BUILD_DIR)/dist/$(PKG_NAME)" "$(INSTALL_DIR)/$(PKG_NAME)"
 
 	if [ -h "$(INSTALL_DIR)/$(LINK_NAME)" ]; then rm -f "$(INSTALL_DIR)/$(LINK_NAME)"; fi
